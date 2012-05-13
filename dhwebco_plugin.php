@@ -5,7 +5,7 @@
  * 
  * @version 0.1
  * @author Devin Humbert <devin.humbert@gmail.com>
- * @link http://dhwebco.com
+ * @link https://bitbucket.org/dhumbert/dhwebco_plugin
  * @copyright 2011 Devin Humbert
  * @license  GPLv3
  * 
