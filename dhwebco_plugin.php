@@ -58,6 +58,13 @@ if (!class_exists('dhwebco_plugin')) {
 			return $this->_plugin_url . $file;
 		}
 
+		/**
+		 * Add a shortcode. Not much easier than add_shortcode, but
+		 * could be extended to perform more functionality at some point.
+		 * @param  string   $code     Shortcode
+		 * @param  string 	$callback The callback that renders the shortcode
+		 * @return void
+		 */
 		protected function shortcode($code, $callback = NULL) {
 			if (!$callback) $callback = 'shortcode_' . $code;
 			add_shortcode($code, array(&$this, $callback));
@@ -129,6 +136,13 @@ if (!class_exists('dhwebco_plugin')) {
 			}
 		}
 
+		/**
+		 * Bulk update an array of post meta from $_POST.
+		 * @param  int $post_id  The ID of the post.
+		 * @param  string $key      The meta key.
+		 * @param  array  $expected Expected keys from $_POST. Will also be used for indices in meta array.
+		 * @return void
+		 */
 		protected function update_post_meta($post_id, $key, array $expected) {
 			$meta = array();
 			foreach ($expected as $val) {
