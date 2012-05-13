@@ -4,19 +4,36 @@
 
 if (!class_exists('dhwebco_plugin')) {
 	abstract class dhwebco_plugin {
+		private $_this_file_url;
+		private $_this_file_dir;
+
 		private $_plugin_slug;
 		private $_plugin_dir;
 		private $_plugin_url;
 
 		/* Ctor. */
 		public function __construct($plugin_file) {
+			$this->_this_file_dir = trailingslashit(dirname(__FILE__));
+			$this->_this_file_url = trailingslashit(str_replace(WP_PLUGIN_DIR, WP_PLUGIN_URL, $this->_this_file_dir));
+
 			$this->_plugin_slug = ltrim(str_replace(WP_PLUGIN_DIR, '', dirname($plugin_file)), '/');
-			$this->_plugin_dir = dirname($plugin_file);
-			$this->_plugin_url = trailingslashit(WP_PLUGIN_URL) . $this->_plugin_slug;
+			$this->_plugin_dir = trailingslashit(dirname($plugin_file));
+			$this->_plugin_url = trailingslashit(trailingslashit(WP_PLUGIN_URL) . $this->_plugin_slug);
+
+			add_action('admin_enqueue_scripts', array(&$this, 'admin_enqueue_scripts'));
 
 			add_action('init', array(&$this, 'hook_init'));
 			add_action('add_meta_boxes', array(&$this, 'hook_add_meta_boxes'));
 			add_action('save_post', array(&$this, 'delegate_save_post_hook'));
+		}
+
+		public function admin_enqueue_scripts() {
+			wp_enqueue_script('dhwebco_form_js', $this->_this_file_url . 'js/form-admin.js');
+			wp_localize_script('dhwebco_form_js', 'dhwebco_plugin', array(
+				'base_url' => $this->_this_file_url,
+			));
+
+			wp_enqueue_style('dhwebco_jqui_css', $this->_this_file_url . 'js/jquery-ui/smoothness/jquery-ui-1.8.20.custom.css');
 		}
 
 		/* Utility methods */
@@ -28,7 +45,7 @@ if (!class_exists('dhwebco_plugin')) {
 		 */
 		protected function plugin_dir($file = '') {
 			$file = ltrim($file, '/');
-			return trailingslashit($this->_plugin_dir) . $file;
+			return $this->_plugin_dir . $file;
 		}
 
 		/**
@@ -38,7 +55,7 @@ if (!class_exists('dhwebco_plugin')) {
 		 */
 		protected function plugin_url($file = '') {
 			$file = ltrim($file, '/');
-			return trailingslashit($this->_plugin_url) . $file;
+			return $this->_plugin_url . $file;
 		}
 		
 		/**
@@ -129,12 +146,20 @@ if (!class_exists('dhwebco_plugin')) {
 
 if (!class_exists('dhwebco_form')) {
 	class dhwebco_form {
+		private $_this_file_url;
+		private $_this_file_dir;
+
 		private $_fields = array();
 
 		const FIELD_TYPE_TEXT = 'text';
 		const FIELD_TYPE_DATE = 'date';
 
 		public $show_as_table = TRUE;
+
+		public function __construct() {
+			$this->_this_file_dir = trailingslashit(dirname(__FILE__));
+			$this->_this_file_url = trailingslashit(str_replace(WP_PLUGIN_DIR, WP_PLUGIN_URL, $this->_this_file_dir));			
+		}
 
 		/**
 		 * Add a field to the form.
@@ -184,7 +209,15 @@ if (!class_exists('dhwebco_form')) {
 		}
 
 		private function _render_field_date($field) {
+			if (!isset($field['attributes']['class'])) $field['attributes']['class'] = '';
+			$field['attributes']['class'] .= ' datepicker';
 
+			printf('<input type="text" name="%s" id="%s" value="%s" %s />',
+				$field['name'],
+				$field['name'],
+				esc_html($field['value']),
+				$this->_html_attributes($field['attributes'])
+			);
 		}
 
 		/**
