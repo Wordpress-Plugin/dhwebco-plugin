@@ -57,6 +57,11 @@ if (!class_exists('dhwebco_plugin')) {
 			$file = ltrim($file, '/');
 			return $this->_plugin_url . $file;
 		}
+
+		protected function shortcode($code, $callback = NULL) {
+			if (!$callback) $callback = 'shortcode_' . $code;
+			add_shortcode($code, array(&$this, $callback));
+		}
 		
 		/**
 		 * Create a basic custom post type.
