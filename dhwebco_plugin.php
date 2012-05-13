@@ -11,9 +11,7 @@ if (!class_exists('dhwebco_plugin')) {
 		/* Ctor. */
 		public function __construct($plugin_file) {
 			$this->_plugin_slug = ltrim(str_replace(WP_PLUGIN_DIR, '', dirname($plugin_file)), '/');
-
 			$this->_plugin_dir = dirname($plugin_file);
-
 			$this->_plugin_url = trailingslashit(WP_PLUGIN_URL) . $this->_plugin_slug;
 
 			add_action('init', array(&$this, 'hook_init'));
@@ -134,6 +132,7 @@ if (!class_exists('dhwebco_form')) {
 		private $_fields = array();
 
 		const FIELD_TYPE_TEXT = 'text';
+		const FIELD_TYPE_DATE = 'date';
 
 		public $show_as_table = TRUE;
 
@@ -182,6 +181,10 @@ if (!class_exists('dhwebco_form')) {
 				esc_html($field['value']),
 				$this->_html_attributes($field['attributes'])
 			);
+		}
+
+		private function _render_field_date($field) {
+
 		}
 
 		/**
