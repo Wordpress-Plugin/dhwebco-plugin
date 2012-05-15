@@ -32,6 +32,8 @@ if (!class_exists('dhwebco_plugin')) {
 		private $_plugin_dir;
 		private $_plugin_url;
 
+		private $_cpts = array();
+
 		/* Ctor. */
 		public function __construct($plugin_file) {
 			$this->_this_file_dir = trailingslashit(dirname(__FILE__));
@@ -45,7 +47,10 @@ if (!class_exists('dhwebco_plugin')) {
 
 			add_action('init', array(&$this, 'hook_init'));
 			add_action('add_meta_boxes', array(&$this, 'hook_add_meta_boxes'));
+			add_action('add_meta_boxes', array(&$this, 'add_thesis_meta_to_cpts'));
 			add_action('save_post', array(&$this, 'delegate_save_post_hook'));
+
+			add_theme_support('post-thumbnails');
 		}
 
 		public function admin_enqueue_scripts() {
@@ -97,10 +102,11 @@ if (!class_exists('dhwebco_plugin')) {
 		 * @param  string $singular Singular name of the CPT (optional).
 		 * @param  string $plural   Plural name of the CPT (optional).
 		 * @param  array  $supports What features the CPT supports (optional).
-		 * @param  string $menu_icon URL of the menu icon for the CPT
+		 * @param  string $menu_icon URL of the menu icon for the CPT (optional).
+		 * @param  string $rewrite_slug The slug for the CPT. Defaults to slugified version of singular. "/" means no slug.
 		 * @return void
 		 */
-		protected function create_basic_cpt($slug, $singular = NULL, $plural = NULL, $supports = array(), $menu_icon = NULL) {
+		protected function create_basic_cpt($slug, $singular = NULL, $plural = NULL, $supports = array(), $menu_icon = NULL, $rewrite_slug = NULL) {
 			if (!$singular) $singular = ucwords(str_replace('_', ' ', $slug));
 			if (!$plural) $plural = $singular . 's';
 			if (!is_array($supports) || count($supports) == 0) 
@@ -122,6 +128,8 @@ if (!class_exists('dhwebco_plugin')) {
 				'menu_name' => $plural,
 			);
 
+			if (!$rewrite_slug) $rewrite_slug = strtolower(str_replace('_', '-', sanitize_title($singular)));
+
 			$args = array(
 				'labels' => $labels,
 				'public' => true,
@@ -129,7 +137,9 @@ if (!class_exists('dhwebco_plugin')) {
 				'show_ui' => true, 
 				'show_in_menu' => true, 
 				'query_var' => true,
-				'rewrite' => true,
+				'rewrite' => array(
+					'slug' => $rewrite_slug,
+				),
 				'capability_type' => 'post',
 				'has_archive' => true, 
 				'hierarchical' => false,
@@ -139,6 +149,15 @@ if (!class_exists('dhwebco_plugin')) {
 			); 
 
 			register_post_type($slug, $args);
+			$this->_cpts[] = $slug;
+		}
+
+		public function add_thesis_meta_to_cpts() {
+			if (class_exists('thesis_post_options')) {
+		        foreach ($this->_cpts as $cpt) {
+			        add_meta_box('thesis_seo_meta', 'SEO Details and Additional Style', array('thesis_post_options', 'output_seo_box'), $cpt, 'normal', 'high');
+			    }
+			}
 		}
 
 		/**
