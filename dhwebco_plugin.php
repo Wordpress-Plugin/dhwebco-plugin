@@ -34,7 +34,6 @@ if (!class_exists('dhwebco_plugin')) {
 
 		private $_cpts = array();
 
-		/* Ctor. */
 		public function __construct($plugin_file) {
 			$this->_this_file_dir = trailingslashit(dirname(__FILE__));
 			$this->_this_file_url = trailingslashit(str_replace(WP_PLUGIN_DIR, WP_PLUGIN_URL, $this->_this_file_dir));
@@ -106,7 +105,7 @@ if (!class_exists('dhwebco_plugin')) {
 		 * @param  string $rewrite_slug The slug for the CPT. Defaults to slugified version of singular. "/" means no slug.
 		 * @return void
 		 */
-		protected function create_basic_cpt($slug, $singular = NULL, $plural = NULL, $supports = array(), $menu_icon = NULL, $rewrite_slug = NULL) {
+		protected function create_cpt($slug, $singular = NULL, $plural = NULL, $supports = array(), $menu_icon = NULL, $rewrite_slug = NULL) {
 			if (!$singular) $singular = ucwords(str_replace('_', ' ', $slug));
 			if (!$plural) $plural = $singular . 's';
 			if (!is_array($supports) || count($supports) == 0) 
@@ -152,12 +151,52 @@ if (!class_exists('dhwebco_plugin')) {
 			$this->_cpts[] = $slug;
 		}
 
+		/**
+		 * If Thesis is installed, add the SEO box to custom post types.
+		 */
 		public function add_thesis_meta_to_cpts() {
 			if (class_exists('thesis_post_options')) {
 		        foreach ($this->_cpts as $cpt) {
 			        add_meta_box('thesis_seo_meta', 'SEO Details and Additional Style', array('thesis_post_options', 'output_seo_box'), $cpt, 'normal', 'high');
 			    }
 			}
+		}
+
+		/**
+		 * Create a custom taxonomy.
+		 * @param  string $slug       Machine-readable name of the taxonomy.
+		 * @param  array  $post_types Slugs of the post types this taxonomy will support.
+		 * @param  string $singular   Singular name (optional).
+		 * @param  string $plural     Plural name (optional).
+		 * @return void
+		 */
+		public function create_tax($slug, array $post_types, $singular = NULL, $plural = NULL) {
+			if (!$singular) $singular = ucwords(str_replace('_', ' ', $slug));
+			if (!$plural) $plural = $singular . 's';
+
+			$labels = array(
+				'name' => _x( $plural, 'taxonomy general name' ),
+				'singular_name' => _x( $singular, 'taxonomy singular name' ),
+				'search_items' =>  __( 'Search ' . $plural ),
+				'all_items' => __( 'All ' . $plural ),
+				'parent_item' => __( 'Parent ' . $singular ),
+				'parent_item_colon' => __( 'Parent ' . $singular . ':' ),
+				'edit_item' => __( 'Edit ' . $singular ), 
+				'update_item' => __( 'Update ' . $singular ),
+				'add_new_item' => __( 'Add New ' . $singular ),
+				'new_item_name' => __( 'New ' . $singular . ' Name' ),
+				'menu_name' => __( $singular ),
+			); 	
+
+			if (!$rewrite_slug) $rewrite_slug = strtolower(str_replace('_', '-', sanitize_title($singular)));
+
+			register_taxonomy($slug, $post_types, array(
+				'hierarchical' => true,
+				'labels' => $labels,
+				'show_ui' => true,
+				'query_var' => true,
+				'rewrite' => array( 'slug' => $rewrite_slug ),
+			));
 		}
 
 		/**
@@ -267,6 +306,12 @@ if (!class_exists('dhwebco_form')) {
 			);
 		}
 
+		/**
+		 * Render a date field. Adds the "datepicker" class, which will automatically
+		 * add the jQuery UI datepicker.
+		 * @param  array $field Field array.
+		 * @return void
+		 */
 		private function _render_field_date($field) {
 			if (!isset($field['attributes']['class'])) $field['attributes']['class'] = '';
 			$field['attributes']['class'] .= ' datepicker';
