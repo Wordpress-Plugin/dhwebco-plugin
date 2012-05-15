@@ -185,7 +185,7 @@ if (!class_exists('dhwebco_plugin')) {
 				'update_item' => __( 'Update ' . $singular ),
 				'add_new_item' => __( 'Add New ' . $singular ),
 				'new_item_name' => __( 'New ' . $singular . ' Name' ),
-				'menu_name' => __( $singular ),
+				'menu_name' => __( $plural ),
 			); 	
 
 			if (!$rewrite_slug) $rewrite_slug = strtolower(str_replace('_', '-', sanitize_title($singular)));
