@@ -381,7 +381,7 @@ if (!class_exists('dhwebco_form')) {
 		}
 
 		public function __toString() {
-			$this->output();
+			return $this->get_output();
 		}
 	}
 }
