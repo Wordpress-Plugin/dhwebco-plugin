@@ -32,6 +32,8 @@ if (!class_exists('dhwebco_plugin')) {
 		private $_plugin_dir;
 		private $_plugin_url;
 
+		public $add_thesis_seo_to_cpts = TRUE;
+
 		private $_cpts = array();
 
 		public function __construct($plugin_file) {
@@ -155,10 +157,12 @@ if (!class_exists('dhwebco_plugin')) {
 		 * If Thesis is installed, add the SEO box to custom post types.
 		 */
 		public function add_thesis_meta_to_cpts() {
-			if (class_exists('thesis_post_options')) {
-		        foreach ($this->_cpts as $cpt) {
-			        add_meta_box('thesis_seo_meta', 'SEO Details and Additional Style', array('thesis_post_options', 'output_seo_box'), $cpt, 'normal', 'high');
-			    }
+			if ($this->add_thesis_seo_to_cpts) {
+				if (class_exists('thesis_post_options')) {
+			        foreach ($this->_cpts as $cpt) {
+				        add_meta_box('thesis_seo_meta', 'SEO Details and Additional Style', array('thesis_post_options', 'output_seo_box'), $cpt, 'normal', 'high');
+				    }
+				}
 			}
 		}
 
