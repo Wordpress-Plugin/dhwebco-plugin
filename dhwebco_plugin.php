@@ -211,6 +211,9 @@ if (!class_exists('dhwebco_plugin')) {
 		 * @return [type]          [description]
 		 */
 		public function delegate_save_post_hook($post_id) {
+			if ( wp_is_post_revision( $post_id ) ) return;
+			if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+			
 			$post_type = get_post_type();
 			if (method_exists(&$this, 'hook_save_post_' . $post_type)) {
 				call_user_func(array(&$this, 'hook_save_post_' . $post_type), $post_id);
