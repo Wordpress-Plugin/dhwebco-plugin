@@ -47,6 +47,7 @@ if (!class_exists('dhwebco_plugin')) {
 			add_action('admin_enqueue_scripts', array(&$this, 'admin_enqueue_scripts'));
 
 			add_action('init', array(&$this, 'hook_init'));
+			add_action('admin_init', array(&$this, 'hook_admin_init'));
 			add_action('add_meta_boxes', array(&$this, 'hook_add_meta_boxes'));
 			add_action('add_meta_boxes', array(&$this, 'add_thesis_meta_to_cpts'));
 			add_action('save_post', array(&$this, 'delegate_save_post_hook'));
@@ -242,6 +243,7 @@ if (!class_exists('dhwebco_plugin')) {
 
 		/** Hooks and filters **/
 		public function hook_init() { }
+		public function hook_admin_init() { }
 		public function hook_add_meta_boxes() { }
 		public function hook_save_post($post_id) { }
 
