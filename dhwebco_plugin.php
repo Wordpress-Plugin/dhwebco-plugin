@@ -258,6 +258,7 @@ if (!class_exists('dhwebco_form')) {
 
 		const FIELD_TYPE_TEXT = 'text';
 		const FIELD_TYPE_DATE = 'date';
+		const FIELD_TYPE_WYSIWYG = 'wysiwyg';
 
 		public $show_as_table = TRUE;
 
@@ -329,6 +330,10 @@ if (!class_exists('dhwebco_form')) {
 				esc_html($field['value']),
 				$this->_html_attributes($field['attributes'])
 			);
+		}
+
+		private function _render_field_wysiwyg($field) {
+			wp_editor($field['value'], $field['name'], $field['attributes']);
 		}
 
 		/**
