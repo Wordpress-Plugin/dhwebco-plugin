@@ -106,9 +106,10 @@ if (!class_exists('dhwebco_plugin')) {
 		 * @param  array  $supports What features the CPT supports (optional).
 		 * @param  string $menu_icon URL of the menu icon for the CPT (optional).
 		 * @param  string $rewrite_slug The slug for the CPT. Defaults to slugified version of singular. "/" means no slug.
+		 * @param  callable $meta_callback The callback to display a meta box. NOT to add_meta_box.
 		 * @return void
 		 */
-		protected function create_cpt($slug, $singular = NULL, $plural = NULL, $supports = array(), $menu_icon = NULL, $rewrite_slug = NULL) {
+		protected function create_cpt($slug, $singular = NULL, $plural = NULL, $supports = array(), $menu_icon = NULL, $rewrite_slug = NULL, $meta_callback = NULL) {
 			if (!$singular) $singular = ucwords(str_replace('_', ' ', $slug));
 			if (!$plural) $plural = $singular . 's';
 			if (!is_array($supports) || count($supports) == 0) 
@@ -148,7 +149,13 @@ if (!class_exists('dhwebco_plugin')) {
 				'menu_position' => null,
 				'supports' => $supports,
 				'menu_icon' => $menu_icon,
-			); 
+			);
+
+			if ($meta_callback) {
+				$args['register_meta_box_cb'] = function() use ($slug, $singular, $meta_callback) {
+					add_meta_box($slug.'-meta', $singular . ' Settings', $meta_callback, $slug, 'normal', 'high');
+				};
+			}
 
 			register_post_type($slug, $args);
 			$this->_cpts[] = $slug;
@@ -237,6 +244,20 @@ if (!class_exists('dhwebco_plugin')) {
 			}
 
 			update_post_meta($post_id, $key, $meta);
+		}
+
+		/**
+		 * Add a shortcode. Takes care of buffering output to return
+		 * it instead of echoing it.
+		 * @param  string   $code     The shortcode.
+		 * @param  function $callback Callback.
+		 */
+		public function shortcode($code, $callback) {
+			add_shortcode($code, function($args, $content = '') use ($callback) {
+				ob_start();
+				call_user_func($callback, $args, $content);
+				return ob_get_clean();
+			});
 		}
 
 		/* End utility methods */
